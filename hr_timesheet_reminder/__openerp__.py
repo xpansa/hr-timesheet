@@ -24,7 +24,7 @@
 {
     "name": "Timesheet Reminder",
     "version": "2.0",
-    "author": "Camptocamp,Odoo Community Association (OCA)",
+    "author": "Camptocamp",
     "license": 'AGPL-3',
     "category": "",
     "website": "http://www.camptocamp.com",
@@ -46,7 +46,7 @@ of TinyERP 4 and OpenERP 5.
     """,
     "depends": ["hr_timesheet_sheet"],
     "init_xml": [],
-    "update_xml": [
+    "data": [
         'security/ir.model.access.csv',
         'wizard/reminder_config_view.xml',
         'wizard/reminder_status_view.xml',

@@ -22,37 +22,42 @@
 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta, MO, SU
-from openerp.osv import orm
+from openerp.osv import osv, orm
 from openerp.tools.translate import _
 
 
-class ResCompany(orm.Model):
+class res_company(orm.Model):
     _inherit = 'res.company'
 
     def get_reminder_recipients(self, cr, uid, ids, context=None):
         """Return the list of users that must receive the email"""
         res = dict((company_id, []) for company_id in ids)
-        employee_obj = self.pool['hr.employee']
+
+        employee_obj = self.pool.get('hr.employee')
+
         for company in self.browse(cr, uid, ids, context=context):
             employee_ids = employee_obj.search(
-                cr, uid, [('company_id', '=', company.id),
-                          ('receive_timesheet_alerts', '=', True)],
-                context=context)
+                    cr, uid,
+                    [('company_id', '=', company.id),
+                     ('receive_timesheet_alerts', '=', True)],
+                    context=context)
+
             if not employee_ids:
                 continue
-            employees = employee_obj.browse(
-                cr, uid, employee_ids, context=context)
-            # periods
-            periods = self.compute_timesheet_periods(
-                cr, uid, company, datetime.now(), context=context)
-            # remove the first one because it's the current one
+
+            employees = employee_obj.browse(cr, uid, employee_ids, context=context)
+
+            #periods
+            periods = self.compute_timesheet_periods(cr, uid, company, datetime.now(), context=context)
+            #remove the first one because it's the current one
             del periods[0]
+
             # for each employee
             for employee in employees:
                 # is timesheet for a period not confirmed ?
                 for period in periods:
-                    status = employee_obj.compute_timesheet_status(
-                        cr, uid, employee.id, period, context)
+                    status = employee_obj.compute_timesheet_status(cr, uid, employee.id, period, context)
+
                     # if there is a missing sheet or a draft sheet
                     # and the user can receive alerts
                     # then we must alert the user
@@ -63,12 +68,11 @@ class ResCompany(orm.Model):
                         break
         return res
 
-    def compute_timesheet_periods(
-            self, cr, uid, company, date, periods_number=5, context=None):
+    def compute_timesheet_periods(self, cr, uid, company, date, periods_number=5, context=None):
         """ return the timeranges to display. This is the 5 last timesheets"""
         periods = []
         last_start_date, last_end_date = self.get_last_period_dates(
-            cr, uid, company, date, context=context)
+                cr, uid, company, date, context=context)
         for cpt in range(periods_number):
             # find the delta between last_XXX_date to XXX_date
             if company.timesheet_range == 'month':
@@ -78,9 +82,10 @@ class ResCompany(orm.Model):
             elif company.timesheet_range == 'year':
                 delta = relativedelta(years=-cpt)
             else:
-                raise orm.except_orm(
-                    _('Error'),
-                    _('Unknow timesheet range: %s') % company.timesheet_range)
+                raise osv.except_osv(
+                        _('Error'),
+                        _('Unknow timesheet range: %s') % company.timesheet_range)
+
             start_date = last_start_date + delta
             end_date = last_end_date + delta
             periods.append((start_date, end_date))
@@ -89,18 +94,22 @@ class ResCompany(orm.Model):
 
     def get_last_period_dates(self, cr, uid, company, date, context=None):
         """ return the start date and end date of the last period to display """
+
         # return the first day and last day of the month
         if company.timesheet_range == 'month':
             start_date = date
             end_date = start_date + relativedelta(months=+1)
-        # return the first and last days of the week
+
+        #return the first and last days of the week
         elif company.timesheet_range == 'week':
             # get monday of current week
             start_date = date + relativedelta(weekday=MO(-1))
             # get sunday of current week
             end_date = date + relativedelta(weekday=SU(+1))
+
         # return the first and last days of the year
         else:
             start_date = datetime(date.year, 1, 1)
             end_date = datetime(date.year, 12, 31)
+
         return start_date, end_date

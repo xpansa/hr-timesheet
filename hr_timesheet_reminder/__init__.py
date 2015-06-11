@@ -19,8 +19,8 @@
 #
 ##############################################################################
 
-from . import hr_employee
-from . import company
-from . import reminder
-from . import wizard
-from . import report
+import hr_employee
+import company
+import reminder
+import wizard
+import report
