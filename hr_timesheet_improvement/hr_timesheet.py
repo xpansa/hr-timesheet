@@ -1,7 +1,7 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author: Nicolas Bessi
+#    Author : Yannick Vaucher (Camptocamp)
 #    Copyright 2013 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -18,26 +18,19 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{'name': 'Task in time sheet',
- 'version': '8.0.0.3.0',
- 'author': "Camptocamp,Odoo Community Association (OCA)",
- 'maintainer': 'Camptocamp - Acsone SA/NV',
- 'category': 'Human Resources',
- 'depends': ['timesheet_task', 'hr_timesheet_sheet'],
- 'description': """Replace project.task.work items linked to task
-                   with hr.analytic.timesheet""",
- 'website': 'http://www.camptocamp.com',
- 'data': ['hr_timesheet_sheet_view.xml',
-          'hr_analytic_timesheet_view.xml',
-          'hr_timesheet_task.xml'],
- 'qweb': ['static/src/xml/timesheet.xml'],
- 'demo': [],
- 'test': [],
- 'installable': True,
- 'images': [],
- 'auto_install': False,
- 'license': 'AGPL-3',
- 'application': True,
- }
+from openerp import models, fields
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+
+class HrAnalyticTimesheet(models.Model):
+    """Set order by line date and analytic account name instead of id
+    We create related stored values as _order cannot be used on inherited
+    columns.
+    """
+    _inherit = "hr.analytic.timesheet"
+    _order = "date_aal DESC, account_name ASC"
+
+    date_aal = fields.Date(related='line_id.date',
+                           store=True)
+
+    account_name = fields.Char(related='account_id.name',
+                               store=True)

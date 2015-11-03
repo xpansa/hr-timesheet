@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Author: Guewen Baconnier (Camptocamp)
-#    Author: Vincent Renaville
-#    Copyright 2012 Camptocamp SA
+#    Authors: Yannick Vaucher (Camptocamp)
+#             Vincent Renaville (Camptocamp)
+#    Copyright 2013 Camptocamp SA
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,29 +19,22 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
-{
-    'name': 'Timesheet Fullfill Wizard',
-    'version': '1.0',
-    'category': 'Generic Modules/Human Resources',
-    'description': '''
-Add a wizard into timesheet allowing people to complete a long period of
-time with the given values. This is mainly useful to handle a long period of
-time like holidays.
-
-Known limitation:
-- Will complete all day between dates
-    ''',
-    'author': "Camptocamp,Odoo Community Association (OCA)",
-    'website': 'http://camptocamp.com',
-    'license': 'AGPL-3',
-    'depends': ['hr_timesheet_sheet', ],
-    'data': [
-        'wizard/timesheet_fulfill_view.xml',
-    ],
-    'demo': [],
-    'test': [],
-    'installable': True,
-    'auto_install': False,
-    'application': False,
-}
+{'name': 'Timesheet improvements',
+ 'version': '8.0.0.1.0',
+ 'author': "Camptocamp,Odoo Community Association (OCA)",
+ 'maintainer': 'Camptocamp',
+ 'category': 'Human Resources',
+ 'depends': ['hr_timesheet_sheet'],
+ 'website': 'http://www.camptocamp.com',
+ 'data': ['hr_timesheet_view.xml'],
+ 'js': [],
+ 'css': [],
+ 'qweb': [],
+ 'demo': [],
+ 'test': [],
+ 'installable': True,
+ 'images': [],
+ 'auto_install': False,
+ 'license': 'AGPL-3',
+ 'application': True,
+ }
