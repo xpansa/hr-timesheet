@@ -24,7 +24,6 @@ from openerp import api, SUPERUSER_ID
 from openerp.tools.translate import _
 
 TASK_WATCHERS = [
-    'work_ids',
     'remaining_hours',
     'effective_hours',
     'planned_hours'
