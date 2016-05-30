@@ -48,18 +48,22 @@ class ProjectTask(orm.Model):
                       WHERE task_id IN %s
                       GROUP BY task_id""", (tuple(ids),))
         hours = dict(cr.fetchall())
-        for task in self.browse(cr, uid, ids, context=context):
-            res[task.id] = {}
-            res[task.id]['effective_hours'] = hours.get(task.id, 0.0)
-            res[task.id]['total_hours'] = (
-                task.remaining_hours or 0.0) + hours.get(task.id, 0.0)
-            res[task.id]['delay_hours'] = res[task.id][
-                'total_hours'] - task.planned_hours
-            res[task.id]['progress'] = 0.0
-            if (task.remaining_hours + hours.get(task.id, 0.0)):
-                res[task.id]['progress'] = round(
-                    100.0 * hours.get(task.id, 0.0) /
-                    res[task.id]['total_hours'], 2)
+        for task_id in ids:
+            cr.execute("""SELECT planned_hours, remaining_hours from project_task
+                      WHERE id=%s""", (task_id,))
+            data = cr.fetchall()
+            planned_hours = data[0][0]
+            remaining_hours = data[0][1]
+            res[task_id] = {}
+            res[task_id]['effective_hours'] = hours.get(task_id, 0.0)
+            res[task_id]['total_hours'] = (remaining_hours or 0.0) + hours.get(task_id, 0.0)
+            res[task_id]['delay_hours'] = res[task_id][
+                'total_hours'] - planned_hours
+            res[task_id]['progress'] = 0.0
+            if (remaining_hours + hours.get(task_id, 0.0)):
+                res[task_id]['progress'] = round(
+                    100.0 * hours.get(task_id, 0.0) /
+                    res[task_id]['total_hours'], 2)
         return res
 
     def _store_set_values(self, cr, uid, ids, fields, context=None):
