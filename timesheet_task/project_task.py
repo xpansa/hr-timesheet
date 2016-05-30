@@ -25,6 +25,7 @@ from openerp.tools.translate import _
 from openerp.tools import float_is_zero
 
 TASK_WATCHERS = [
+    'stage_id',
     'remaining_hours',
     'effective_hours',
     'planned_hours'
@@ -52,8 +53,8 @@ class ProjectTask(orm.Model):
             cr.execute("""SELECT planned_hours, remaining_hours from project_task
                       WHERE id=%s""", (task.id,))
             data = cr.fetchall()
-            planned_hours = data[0][0]
-            remaining_hours = data[0][1]
+            planned_hours = data[0][0] or 0.0
+            remaining_hours = data[0][1] or 0.0
 
             res[task.id] = {
                 'effective_hours': hours.get(task.id, 0.0),
