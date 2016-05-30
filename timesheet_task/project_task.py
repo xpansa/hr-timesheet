@@ -22,6 +22,7 @@
 from openerp.osv import orm, fields
 from openerp import api, SUPERUSER_ID
 from openerp.tools.translate import _
+from openerp.tools import float_is_zero
 
 TASK_WATCHERS = [
     'remaining_hours',
@@ -41,29 +42,29 @@ class ProjectTask(orm.Model):
     _name = "project.task"
 
     def _progress_rate(self, cr, uid, ids, names, arg, context=None):
-        """TODO improve code taken for OpenERP"""
         res = {}
         cr.execute("""SELECT task_id, COALESCE(SUM(unit_amount),0)
                         FROM account_analytic_line
                       WHERE task_id IN %s
                       GROUP BY task_id""", (tuple(ids),))
         hours = dict(cr.fetchall())
-        for task_id in ids:
+        for task in self.browse(cr, uid, ids, context=context):
             cr.execute("""SELECT planned_hours, remaining_hours from project_task
-                      WHERE id=%s""", (task_id,))
+                      WHERE id=%s""", (task.id,))
             data = cr.fetchall()
             planned_hours = data[0][0]
             remaining_hours = data[0][1]
-            res[task_id] = {}
-            res[task_id]['effective_hours'] = hours.get(task_id, 0.0)
-            res[task_id]['total_hours'] = (remaining_hours or 0.0) + hours.get(task_id, 0.0)
-            res[task_id]['delay_hours'] = res[task_id][
-                'total_hours'] - planned_hours
-            res[task_id]['progress'] = 0.0
-            if (remaining_hours + hours.get(task_id, 0.0)):
-                res[task_id]['progress'] = round(
-                    100.0 * hours.get(task_id, 0.0) /
-                    res[task_id]['total_hours'], 2)
+
+            res[task.id] = {
+                'effective_hours': hours.get(task.id, 0.0),
+                'total_hours': (remaining_hours or 0.0) + hours.get(task.id, 0.0)
+            }
+            res[task.id]['delay_hours'] = res[task.id]['total_hours'] - planned_hours
+            res[task.id]['progress'] = 0.0
+            if not float_is_zero(res[task.id]['total_hours'], precision_digits=2):
+                res[task.id]['progress'] = round(min(100.0 * hours.get(task.id, 0.0) / res[task.id]['total_hours'], 99.99),2)
+            if task.stage_id and task.stage_id.fold:
+                res[task.id]['progress'] = 100.0
         return res
 
     def _store_set_values(self, cr, uid, ids, fields, context=None):
